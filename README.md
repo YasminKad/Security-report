@@ -64,43 +64,54 @@ and confirmed that the cookie theft was successful!
 
 # 2. Bravo Exploit: Cross-site request forgery (CSRF)
 
-For the first step we need to alter tha changes in the browser's setting. In the privacy and security tab in firefox browser,we need to set the browser privacy to custom and enable cross-site tracking cookies.
+For the first step we need to alter the changes in the browser's setting. In the privacy and security tab in firefox browser, we need to set the browser privacy to custom and enable cross-site tracking cookies.
+![image](https://github.com/user-attachments/assets/570c15a7-a9f4-4e30-b11b-939e7b779aa6)
+
 
 followed by that there is the `b.html` file to fill.
 
 There are 3 parts to the code:
 
-1. The script in <head>
+1. The script i‍n `<head>`
 
-The JavaScript in the <head> defines and handles the malicious behavior of the page.
+The JavaScript in the `<head>` defines and handles the malicious behavior of the page.
+ 
 The `document.addEventListener("DOMContentLoaded", ...)` ensures the code runs only after the HTML document has fully loaded, and it guarantees that all elements like the form and iframe are accessible in the DOM before the script executes.
+ 
 The constant `hijackUrl` stores the URL where the browser will redirect the user after the form submission process completes.
+ 
 The variable let `isSubmitted = false` tracks whether the form has been submitted. It prevents accidental or repeated redirection before the form is submitted.
-The `handleTransferAndRedirect()`` function is the core function that selects the form `(document.forms['transfer_form'])` and iframe `(document.getElementById("transformiFrame"))`.It submits the form using `form.submit()` to send data to the target endpoint. Additionally, it sets `isSubmitted` to true to indicate that the form has been sent.
+The `handleTransferAndRedirect()` function is the core function that selects the form `(document.forms['transfer_form'])` and iframe `(document.getElementById("transformiFrame"))`.It submits the form using `form.submit()` to send data to the target endpoint. Additionally, it sets `isSubmitted` to true to indicates that the form has been sent.
 
 This function adds an event listener to the iframe's load event:
+ 
 When the iframe finishes loading, the browser checks if the form submission was completed `(isSubmitted === true)`.
+
 If true, the browser redirects the user to the `hijackUrl`.
 
 For the final step of this part, the call to `handleTransferAndRedirect()` executes the function immediately after defining it to initiate the form submission and set up the iframe listener.
 
-2. The form in <body>
+2. The form in `<body>`
+ 
 The form, identified by the `id="transfer_form"`, is configured to silently submit data to a specified endpoint (`http://localhost:3000/post_transfer`) using the `POST` method, with the results directed to a hidden iframe (`target="transformiFrame"`).
+ 
 It includes two hidden inputs: `destination_username`, preset to `"attacker"`, and `quantity`, set to `10`, ensuring the transfer operation remains invisible to the user. These attributes collectively enable the seamless execution of the attack without the user’s knowledge.
-
-3. The iFrame in <body>
+ 
+3. The iFrame in `<body>`
 The hidden iframe, identified by `id="transformiFrame"`, serves as an invisible intermediary to handle the form's response without user awareness. Its `name="transformiFrame"` attribute matches the form's `target` attribute, ensuring the form's submission results are loaded into the iframe. Once the form submission is complete and the iframe finishes loading the response, a `load` event is triggered in the JavaScript, redirecting the user to the predefined `hijackUrl`. This setup enables a seamless, covert operation.
-I originally wanted to use the Promise function to have the functions executing in row but for some reason it did not work. Instead, I used the target attribute for form.
-
-
+ 
+I originally wanted to use the Promise function to have the functions executing in row but for some reason it did not work. Instead, I used the target attribute for form. 
+ 
 here are the links I used for this question:
-``` url https://www.w3schools.com/tags/att_form_target.asp```
+```url https://www.w3schools.com/tags/att_form_target.asp```
 ```url https://stackoverflow.com/questions/37146241/promise-not-working-properly```
 
 # 3. Gamma Exploit: Timing Attack
-
+ 
 In this part of the Homework, a timming attack is going to be performed. In this Scenario, Since the computation time of the server for the correct and incorrect passwords are not the same, the attacker can figure out which password is the correct one. 
+ 
 In the given file of the question, there is a dictionary of the possible passwords containing the correct password.
+ 
 In the following steps, I'm going to explain the completed version of the template provided under the name `Gamma_Starter.html` named as g.txt:
 ``` javascript
 var dictionary = [`password`, `123456`, `12345678`, `dragon`, `1234`, `qwerty`, `12345`];
@@ -140,12 +151,15 @@ test.onerror = function () {
       };
 ```
 In the function, `timeTaking` has been added to calculate the exact time that a password takes time to be checked. 
+ 
 Later, I placed a log in the code that each try for a password be logged and I would be able to check it in the logs of my docker container.
+ 
 ![image](https://github.com/user-attachments/assets/7e7924b0-aec8-4d97-b88a-b0fedcf41a0e)
+ 
 After the logs, each timing is stored in the `timing` array.
+ 
 As long as we have not reached the end of the array, each password is tested in the `test.src` url. After that the `maxTimeEntry` variable, stores the max time that a password has taken to be checked by being checked in the `else` with the current time.
+ 
 In the next step, there is the `guessedPassword` variable holding the element in the dictionary via finding it by the index of `maxTimeEntry` and then it logs it.(The correct password can be seen in the image above.)
+ 
 The last part of the code sends a request to a server with the guessed password and its response time by dynamically creating a URL (`theftUrl`). An `Image` object (`theftImage`) is used to initiate the request by setting its `src` property to the URL. This triggers an HTTP GET request, and a log indicates the request is being sent with the guessed password. 
-
-
-
